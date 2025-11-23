@@ -36,21 +36,9 @@ export async function GET(request: NextRequest) {
             password: credentials.password,
           });
 
-          let devices;
-          try {
-            devices = await api.getDevices();
-          } catch (apiError) {
-            // Handle rate limiting gracefully
-            if (apiError instanceof Error && apiError.message.includes("attempts.limit")) {
-              console.warn(`[Devices API] Rate limit hit for ${credentials.username}, using cached data`);
-              // Continue with cached data from database instead of failing
-              // Fall through to return cached devices
-            } else {
-              throw apiError; // Re-throw other errors
-            }
-          }
+          const devices = await api.getDevices();
           
-          // Only process devices if we successfully fetched them
+          // Process devices
           if (devices) {
 
           for (const device of devices) {
@@ -181,13 +169,8 @@ export async function GET(request: NextRequest) {
           }
           } // End of if (devices) block
         } catch (error) {
-          // Log error but continue to return cached data
-          if (error instanceof Error && error.message.includes("attempts.limit")) {
-            console.warn(`[Devices API] Rate limit error for ${credentials.username}, returning cached data`);
-          } else {
-            console.error(`[Devices API] Error fetching devices:`, error);
-          }
-          // Continue to return cached devices from database
+          console.error(`[Devices API] Error fetching devices:`, error);
+          throw error;
         }
       }
     }
