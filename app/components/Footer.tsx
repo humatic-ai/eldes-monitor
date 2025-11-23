@@ -12,48 +12,41 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-surface border-t border-border mt-auto">
-      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-text-secondary text-center sm:text-left">
-            <p>
-              © {currentYear} ELDES ESIM364 Monitor. All rights reserved.
-            </p>
-            <p className="mt-1">
-              Fork of{" "}
-              <a
-                href="https://github.com/augustas2/eldes"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:text-accent-hover underline"
-              >
-                augustas2/eldes
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://github.com/tanelvakker/eldes-cloud-api"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:text-accent-hover underline"
-              >
-                tanelvakker/eldes-cloud-api
-              </a>
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://www.linkedin.com/company/humatic-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-text-secondary hover:text-accent transition-colors"
-              aria-label="HumaticAI LinkedIn"
+    <footer className="pt-6 pb-5 px-4 md:px-8 border-t border-border mt-8">
+      <div className="max-w-container mx-auto relative">
+        <ul className="list-none flex justify-center gap-3 mb-1.5 relative">
+          <li>
+            <Link
+              href="/"
+              className="no-underline text-text-secondary transition-colors duration-300 text-xs font-medium hover:text-text-primary"
             >
-              <Linkedin className="w-5 h-5" />
+              Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/credentials"
+              className="no-underline text-text-secondary transition-colors duration-300 text-xs font-medium hover:text-text-primary"
+            >
+              Credentials
+            </Link>
+          </li>
+          <li className="absolute right-0 top-1/2 -translate-y-1/2">
+            <a
+              href="https://www.linkedin.com/company/humaticai/"
+              target="_blank"
+              rel="noopener"
+              aria-label="LinkedIn"
+              className="inline-flex items-center leading-none text-text-secondary transition-colors duration-300 hover:text-text-primary"
+            >
+              <Linkedin className="w-4 h-4" aria-hidden="true" />
             </a>
-          </div>
-        </div>
+          </li>
+        </ul>
+        <p className="text-center text-text-secondary text-xs m-0">
+          &copy; {currentYear} HumaticAI. All rights reserved.
+        </p>
       </div>
     </footer>
   );
 }
-
