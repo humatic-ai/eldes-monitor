@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "./header";
-import Footer from "./footer";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import { Toaster } from "react-hot-toast";
 import { ConfirmDialogProvider } from "./components/ConfirmDialogProvider";
 
