@@ -34,8 +34,9 @@
 6. **Start the Next.js Application**
    ```bash
    npm start
-   # Or use the startup script:
-   ./start.sh
+   # Or use the management script:
+   ./scripts/manage.sh start    # Start with PM2 (production)
+   ./scripts/manage.sh run      # Run directly without PM2 (testing)
    ```
 
 7. **Access the Application**

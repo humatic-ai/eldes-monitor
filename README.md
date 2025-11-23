@@ -52,12 +52,12 @@ cd /home/bitnami/eldes
 npm run build
 ```
 
-#### Option B: Using the PM2 Manager Script
+#### Option B: Using the Management Script
 
-The `pm2-manager.sh` script automatically sets the correct PATH and provides process management:
+The `scripts/manage.sh` script automatically sets the correct PATH and provides process management:
 
 ```bash
-chmod +x pm2-manager.sh
+chmod +x scripts/manage.sh
 export PATH="/opt/bitnami/node/bin:$PATH"
 npm run build
 ```
@@ -98,16 +98,17 @@ PM2 provides process management, auto-restart, and log management:
 # Install PM2 globally (if not already installed)
 npm install -g pm2
 
-# Use the PM2 management script
-chmod +x pm2-manager.sh
-./pm2-manager.sh start
+# Use the management script
+chmod +x scripts/manage.sh
+./scripts/manage.sh start
 
-# Other PM2 commands:
-./pm2-manager.sh stop      # Stop the application
-./pm2-manager.sh restart   # Restart the application
-./pm2-manager.sh reload    # Zero-downtime reload
-./pm2-manager.sh status    # Show status
-./pm2-manager.sh logs      # View logs
+# Other management commands:
+./scripts/manage.sh stop      # Stop the application
+./scripts/manage.sh restart   # Restart the application
+./scripts/manage.sh reload    # Zero-downtime reload
+./scripts/manage.sh status    # Show application status
+./scripts/manage.sh logs       # View application logs
+./scripts/manage.sh run        # Run directly without PM2 (for testing)
 ```
 
 **⚠️ Important**: The script will warn you if PM2 startup is not configured. To enable auto-start on system reboot:
@@ -118,15 +119,15 @@ pm2 startup
 pm2 save
 ```
 
-#### Option B: Using the PM2 Manager Script (Recommended)
+#### Option B: Using the Management Script (Recommended)
 
-The `pm2-manager.sh` script provides process management and automatically sets the correct PATH:
+The `scripts/manage.sh` script provides process management and automatically sets the correct PATH:
 
 ```bash
-chmod +x pm2-manager.sh
-./pm2-manager.sh start    # Start with PM2 (production)
+chmod +x scripts/manage.sh
+./scripts/manage.sh start    # Start with PM2 (production)
 # Or for direct run without PM2:
-./pm2-manager.sh run      # Run directly (testing)
+./scripts/manage.sh run      # Run directly (testing)
 ```
 
 #### Option C: Manual Start with PATH
@@ -203,10 +204,10 @@ npm run build
 # Start production server (port 3600)
 npm start
 
-# Or use the PM2 manager script (recommended for production)
-./pm2-manager.sh start    # Start with PM2
+# Or use the management script (recommended for production)
+./scripts/manage.sh start    # Start with PM2
 # Or run directly without PM2 (for testing):
-./pm2-manager.sh run
+./scripts/manage.sh run
 ```
 
 ### Production Management with PM2
@@ -215,22 +216,25 @@ For production deployments, use PM2 for process management:
 
 ```bash
 # Start application
-./pm2-manager.sh start
+./scripts/manage.sh start
 
 # Stop application
-./pm2-manager.sh stop
+./scripts/manage.sh stop
 
 # Restart application
-./pm2-manager.sh restart
+./scripts/manage.sh restart
 
 # Zero-downtime reload (graceful restart)
-./pm2-manager.sh reload
+./scripts/manage.sh reload
 
 # View status
-./pm2-manager.sh status
+./scripts/manage.sh status
 
 # View logs
-./pm2-manager.sh logs
+./scripts/manage.sh logs
+
+# Run directly without PM2 (for testing)
+./scripts/manage.sh run
 
 # Configure auto-start on system reboot
 pm2 startup

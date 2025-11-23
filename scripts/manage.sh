@@ -1,6 +1,6 @@
 #!/bin/bash
-# PM2 Management Script for ELDES Monitor
-# Usage: ./pm2-manager.sh [start|stop|restart|reload|status|logs]
+# Application Management Script for ELDES Monitor
+# Usage: ./scripts/manage.sh [start|stop|restart|reload|status|logs|run]
 
 set -e
 
