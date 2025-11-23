@@ -41,12 +41,18 @@ if (existingDemo) {
 
 // Check if demo device exists
 const demoDeviceId = '999999999999999';
-const existingDevice = db.prepare("SELECT id FROM devices WHERE device_id = ?").get(demoDeviceId);
+const existingDevice = db.prepare("SELECT id, credential_id FROM devices WHERE device_id = ?").get(demoDeviceId);
 
 let deviceDbId;
 if (existingDevice) {
   deviceDbId = existingDevice.id;
-  console.log('Demo device already exists, using ID:', deviceDbId);
+  // Update credential_id if it's associated with wrong credential
+  if (existingDevice.credential_id !== credentialId) {
+    db.prepare("UPDATE devices SET credential_id = ? WHERE id = ?").run(credentialId, deviceDbId);
+    console.log('Demo device already exists, updated credential_id to:', credentialId);
+  } else {
+    console.log('Demo device already exists, using ID:', deviceDbId);
+  }
 } else {
   // Create demo device
   const result = db.prepare(`
