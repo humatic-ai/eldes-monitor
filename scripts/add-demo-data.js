@@ -57,93 +57,205 @@ if (existingDevice) {
   console.log('Created demo device with ID:', deviceDbId);
 }
 
-// Generate temperature data for the last 30 days
-console.log('Generating temperature data...');
+// Generate temperature data for the last 1 month (30 days)
+console.log('Generating temperature data for last 1 month...');
 const now = Date.now();
 const oneHour = 60 * 60 * 1000;
 const oneDay = 24 * oneHour;
-const thirtyDaysAgo = now - (30 * oneDay);
+const oneMonthAgo = now - (30 * oneDay);
 
-// Generate data points every hour for 30 days
+// Prepare insert statement
 const insertTemp = db.prepare(`
   INSERT INTO temperature_history (device_id, sensor_id, sensor_name, temperature, min_temperature, max_temperature, recorded_at)
   VALUES (?, ?, ?, ?, ?, ?, ?)
 `);
 
 // Clear existing demo temperature data
-db.prepare("DELETE FROM temperature_history WHERE device_id = ?").run(deviceDbId);
+const deleteStmt = db.prepare("DELETE FROM temperature_history WHERE device_id = ?");
+const deleteTransaction = db.transaction(() => {
+  deleteStmt.run(deviceDbId);
+});
+deleteTransaction();
 console.log('Cleared existing temperature data for demo device');
 
-// Generate realistic temperature data with variation
-let currentTime = thirtyDaysAgo;
-
-// Generate 3 sensors worth of data
-// Sensor 1: Outside temperature (5-25°C, varies with time of day)
-// Sensor 2: Internal temperature (18-22°C, relatively stable)
-// Sensor 3: Boiler temperature (50-80°C, heating system)
-
-for (let sensor = 1; sensor <= 3; sensor++) {
-  let sensorName, baseTemp, tempRange, variation;
+// Function to generate realistic Vilnius temperature based on date
+function getVilniusTemperature(date) {
+  const month = date.getMonth(); // 0-11
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / oneDay);
+  const hourOfDay = date.getHours();
   
-  if (sensor === 1) {
-    // Outside temperature: varies significantly with time of day
-    sensorName = 'Outside';
-    baseTemp = 15.0; // Average outside temp
-    tempRange = 10.0; // ±10°C variation
-    variation = 2.0; // Random variation
-  } else if (sensor === 2) {
-    // Internal temperature: stable indoor temp
-    sensorName = 'Internal';
-    baseTemp = 20.0; // Comfortable indoor temp
-    tempRange = 2.0; // ±2°C variation
-    variation = 0.5; // Small random variation
-  } else {
-    // Boiler temperature: heating system temp
-    sensorName = 'Boiler';
-    baseTemp = 65.0; // Typical boiler temp
-    tempRange = 15.0; // ±15°C variation (50-80°C range)
-    variation = 3.0; // Some variation
+  // Seasonal base temperature for Vilnius (monthly averages)
+  // Jan: -5°C, Feb: -4°C, Mar: 0°C, Apr: 7°C, May: 13°C, Jun: 16°C
+  // Jul: 18°C, Aug: 17°C, Sep: 12°C, Oct: 6°C, Nov: 1°C, Dec: -3°C
+  const monthlyAverages = [-5, -4, 0, 7, 13, 16, 18, 17, 12, 6, 1, -3];
+  const baseTemp = monthlyAverages[month];
+  
+  // Add seasonal variation (sine wave over the year)
+  const seasonalVariation = Math.sin((dayOfYear / 365) * 2 * Math.PI - Math.PI / 2) * 3;
+  
+  // Daily cycle: coldest around 4 AM, warmest around 2 PM
+  const dailyCycle = Math.sin((hourOfDay - 4) * Math.PI / 12) * 5;
+  
+  // Random weather variation
+  const weatherVariation = (Math.random() - 0.5) * 8;
+  
+  // Extreme cold snaps in winter, heat waves in summer
+  let extremeVariation = 0;
+  if (month >= 11 || month <= 1) {
+    // Winter: occasional cold snaps down to -20°C
+    if (Math.random() < 0.1) extremeVariation = -10 - Math.random() * 5;
+  } else if (month >= 5 && month <= 7) {
+    // Summer: occasional heat waves up to 30°C
+    if (Math.random() < 0.1) extremeVariation = 5 + Math.random() * 5;
   }
   
-  for (let i = 0; i < 30 * 24; i++) {
-    const hourOfDay = (i % 24);
-    let temperature;
-    
-    if (sensor === 1) {
-      // Outside: lower at night (2-6 AM), peaks in afternoon (2-4 PM)
-      // Simulate daily cycle: coldest around 4 AM, warmest around 2 PM
-      const dayCycle = Math.sin((hourOfDay - 4) * Math.PI / 12) * tempRange;
-      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
-      // Clamp to realistic outside range (5-25°C)
-      temperature = Math.max(5, Math.min(25, temperature));
-    } else if (sensor === 2) {
-      // Internal: slight variation throughout day, more stable
-      const dayCycle = Math.sin((hourOfDay - 6) * Math.PI / 12) * tempRange;
-      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
-      // Clamp to comfortable indoor range (18-22°C)
-      temperature = Math.max(18, Math.min(22, temperature));
-    } else {
-      // Boiler: varies with heating demand (lower at night, higher during day)
-      const dayCycle = Math.sin((hourOfDay - 6) * Math.PI / 12) * tempRange;
-      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
-      // Clamp to typical boiler range (50-80°C)
-      temperature = Math.max(50, Math.min(80, temperature));
-    }
-    
-    const minTemp = temperature - 0.5;
-    const maxTemp = temperature + 0.5;
-    
-    const recordedAt = new Date(currentTime).toISOString();
-    
-    insertTemp.run(deviceDbId, sensor, sensorName, temperature, minTemp, maxTemp, recordedAt);
-    
-    currentTime += oneHour;
-  }
+  const temperature = baseTemp + seasonalVariation + dailyCycle + weatherVariation + extremeVariation;
   
-  currentTime = thirtyDaysAgo;
+  // Clamp to realistic Vilnius range (-25°C to 35°C)
+  return Math.max(-25, Math.min(35, temperature));
 }
 
-console.log('Generated temperature data for 3 sensors over 30 days');
+// Generate temperature data
+let currentTime = oneMonthAgo;
+const totalHours = 30 * 24;
+
+// Store outside temperatures first, then calculate internal and boiler
+const outsideTemps = [];
+
+console.log('Generating outside temperatures (Vilnius data)...');
+for (let i = 0; i < totalHours; i++) {
+  const date = new Date(currentTime);
+  const outsideTemp = getVilniusTemperature(date);
+  outsideTemps.push(outsideTemp);
+  currentTime += oneHour;
+}
+
+// Use transaction for better performance
+const insertTransaction = db.transaction((data) => {
+  for (const record of data) {
+    insertTemp.run(record.deviceDbId, record.sensor, record.name, record.temp, record.minTemp, record.maxTemp, record.recordedAt);
+  }
+});
+
+// Collect all records first, then insert in transaction
+console.log('Generating sensor data (Outside, Internal, Boiler)...');
+const allRecords = [];
+currentTime = oneMonthAgo;
+let currentInternal = 20.0; // Track internal temperature over time
+
+for (let i = 0; i < totalHours; i++) {
+  const date = new Date(currentTime);
+  const hourOfDay = date.getHours();
+  const outsideTemp = outsideTemps[i];
+  
+  // Calculate internal temperature (around 20°C, influenced by outside and boiler)
+  const targetInternal = 20.0;
+  
+  // Outside influence: when it's very cold outside, internal tends to drop
+  // When it's warm outside, internal tends to rise slightly
+  let outsideInfluence = 0;
+  if (outsideTemp < 10) {
+    // Cold outside: internal tends to drop (heating tries to compensate)
+    outsideInfluence = (outsideTemp - 10) * 0.08;
+  } else if (outsideTemp > 20) {
+    // Warm outside: internal tends to rise
+    outsideInfluence = (outsideTemp - 20) * 0.05;
+  }
+  
+  // Internal temperature slowly adjusts toward target, influenced by outside
+  const adjustmentRate = 0.1; // How quickly internal temp adjusts
+  currentInternal = currentInternal + (targetInternal - currentInternal) * adjustmentRate + outsideInfluence;
+  
+  // Add slight daily variation and random noise
+  const dailyVariation = Math.sin((hourOfDay - 6) * Math.PI / 12) * 0.3;
+  const randomVariation = (Math.random() - 0.5) * 0.5;
+  const internalTemp = currentInternal + dailyVariation + randomVariation;
+  
+  // Clamp to realistic indoor range (18-22°C)
+  const finalInternalTemp = Math.max(18, Math.min(22, internalTemp));
+  currentInternal = finalInternalTemp; // Update tracked value
+  
+  // Calculate boiler temperature based on heating demand
+  // Heating demand increases when:
+  // 1. Outside is cold (more heat loss)
+  // 2. Internal is below target (needs heating)
+  const tempDifference = targetInternal - finalInternalTemp;
+  const outsideColdFactor = Math.max(0, (10 - outsideTemp) / 10); // 0-1, higher when colder
+  const internalLowFactor = Math.max(0, tempDifference / 2); // 0-1, higher when internal is low
+  
+  // Combined heating demand (0-1 scale)
+  const heatingDemand = Math.min(1, (outsideColdFactor * 0.7 + internalLowFactor * 0.3));
+  
+  // Boiler temperature: 50°C (idle) to 80°C (full heating)
+  let boilerTemp = 50 + (heatingDemand * 30);
+  
+  // Add some variation
+  const boilerVariation = (Math.random() - 0.5) * 3;
+  boilerTemp += boilerVariation;
+  
+  // Clamp to realistic boiler range (45-85°C)
+  const finalBoilerTemp = Math.max(45, Math.min(85, boilerTemp));
+  
+  // Store temperatures for all 3 sensors
+  const temperatures = [
+    { sensor: 1, name: 'Outside', temp: outsideTemp },
+    { sensor: 2, name: 'Internal', temp: finalInternalTemp },
+    { sensor: 3, name: 'Boiler', temp: finalBoilerTemp }
+  ];
+  
+  // Prepare records for all sensors
+  for (const sensorData of temperatures) {
+    let minTemp, maxTemp;
+    
+    if (sensorData.sensor === 1) {
+      // Outside: wider range (±2-3°C)
+      const range = 2.5 + Math.random() * 0.5;
+      minTemp = sensorData.temp - range;
+      maxTemp = sensorData.temp + range;
+    } else if (sensorData.sensor === 2) {
+      // Internal: tighter range (±0.5-1°C)
+      const range = 0.5 + Math.random() * 0.5;
+      minTemp = sensorData.temp - range;
+      maxTemp = sensorData.temp + range;
+    } else {
+      // Boiler: moderate range (±2-4°C)
+      const range = 2.0 + Math.random() * 2.0;
+      minTemp = sensorData.temp - range;
+      maxTemp = sensorData.temp + range;
+    }
+    
+    const recordedAt = new Date(currentTime).toISOString();
+    allRecords.push({
+      deviceDbId,
+      sensor: sensorData.sensor,
+      name: sensorData.name,
+      temp: sensorData.temp,
+      minTemp,
+      maxTemp,
+      recordedAt
+    });
+  }
+  
+  currentTime += oneHour;
+  
+  // Progress indicator every 1000 hours
+  if (i % 1000 === 0 && i > 0) {
+    console.log(`Progress: ${Math.round((i / totalHours) * 100)}% (${i}/${totalHours} hours)`);
+  }
+}
+
+console.log(`Inserting ${allRecords.length} temperature records...`);
+// Insert in batches to avoid database lock
+const batchSize = 1000;
+for (let i = 0; i < allRecords.length; i += batchSize) {
+  const batch = allRecords.slice(i, i + batchSize);
+  insertTransaction(batch);
+  if (i % 10000 === 0 && i > 0) {
+    console.log(`Inserted ${i}/${allRecords.length} records...`);
+  }
+}
+
+console.log('Generated temperature data for 3 sensors over 1 month (30 days)');
 console.log('Demo setup complete!');
 console.log('');
 console.log('Demo credentials:');
