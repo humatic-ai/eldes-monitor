@@ -33,9 +33,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Temperature Monitoring Graph
 
-![Temperature Graph](docs/images/temperature-graph.png)
+![Temperature Graph - 1 Week View](docs/images/temperature-graph-1w.png)
 
-The temperature monitoring graph displays historical temperature data with multiple time period views (1h, 24h, 1w, 1m, 1y, 2y, All) and supports multiple temperature sensors per device.
+The temperature monitoring graph displays historical temperature data with multiple time period views (1h, 24h, 1w, 1m, 1y, 2y, All) and supports multiple temperature sensors per device. The screenshot above shows the 1-week view of temperature data for the demo device.
 
 ## Quick Start
 
