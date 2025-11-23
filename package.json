@@ -12,6 +12,10 @@
   "bugs": {
     "url": "https://github.com/humatic-ai/eldes-monitor/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/humatic-ai"
+  },
   "keywords": [
     "eldes",
     "esim364",
