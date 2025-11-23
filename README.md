@@ -29,6 +29,40 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Automated Fetching**: Hourly automatic device status updates
 - **Mobile-First Design**: Responsive UI optimized for all devices
 
+## Quick Start
+
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Set Encryption Key (Optional but Recommended)**
+   ```bash
+   # Generate a secure key
+   openssl rand -base64 32
+   # Add to .env.local or export as environment variable
+   export ELDES_ENCRYPTION_KEY="your-generated-key-here"
+   ```
+
+3. **Build the Application**
+   ```bash
+   export PATH="/opt/bitnami/node/bin:$PATH"  # Ensure Node.js v22+ is in PATH
+   npm run build
+   ```
+
+4. **Start the Application**
+   ```bash
+   chmod +x eldes-monitor.sh
+   ./eldes-monitor.sh start    # Start with PM2 (production)
+   # Or run directly without PM2 (for testing):
+   ./eldes-monitor.sh run
+   ```
+
+5. **Access the Application**
+   - Open your application URL (e.g., `https://yourdomain.com/eldes`)
+   - Add your ELDES Cloud API credentials
+   - Start monitoring your devices!
+
 ## Setup
 
 ### 1. Install Dependencies
@@ -242,7 +276,38 @@ pm2 startup
 pm2 save
 ```
 
-**Note**: The PM2 management script will warn you if startup configuration is missing and prompt before continuing.
+**Note**: The management script will warn you if PM2 startup configuration is missing and prompt before continuing.
+
+### Running as a Systemd Service (Alternative)
+
+You can also run the application as a systemd service instead of PM2:
+
+Create `/etc/systemd/system/eldes-monitor.service`:
+
+```ini
+[Unit]
+Description=ELDES ESIM364 Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=bitnami
+WorkingDirectory=/home/bitnami/eldes
+Environment="ELDES_ENCRYPTION_KEY=your-key-here"
+Environment="PATH=/opt/bitnami/node/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/opt/bitnami/node/bin/npm start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then:
+```bash
+sudo systemctl enable eldes-monitor
+sudo systemctl start eldes-monitor
+sudo systemctl status eldes-monitor
+```
 
 ### Troubleshooting Build/Start Errors
 
@@ -279,6 +344,27 @@ kill -9 <PID>
 # Or kill all node processes
 pkill -f "next"
 ```
+
+### Apache Configuration Issues
+
+If you're using Apache as a reverse proxy:
+
+- Check Apache error logs: `/opt/bitnami/apache/logs/error_log`
+- Verify proxy modules are loaded: `sudo /opt/bitnami/apache/bin/httpd -M | grep proxy`
+- Test Apache configuration: `sudo /opt/bitnami/apache/bin/httpd -t`
+- Restart Apache: `sudo /opt/bitnami/ctlscript.sh restart apache`
+
+### Database Issues
+
+- The database is automatically created on first run
+- Location: `eldes.db` (in the project root)
+- To reset: Delete `eldes.db` and restart the application
+- Verify database file permissions: `ls -la eldes.db`
+- The database stores:
+  - User credentials (encrypted)
+  - Device information
+  - Device status history
+  - Temperature history (24+ hours)
 
 ## Notes
 
