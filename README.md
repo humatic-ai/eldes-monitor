@@ -71,6 +71,27 @@ The temperature monitoring graph displays historical temperature data with multi
    - Add your ELDES Cloud API credentials
    - Start monitoring your devices!
 
+## Demo Data
+
+For testing and demonstration purposes, demo data has been pre-loaded in the database:
+
+- **Demo Device:**
+  - Device ID: `999999999999999`
+  - Device Name: `Demo ELDES Device`
+  - Pre-generated temperature data: 30 days of hourly readings from 3 temperature sensors
+
+**Note:** The demo device includes pre-generated temperature data for visualization and testing. To view the demo device, you need to be logged in with valid ELDES Cloud API credentials. The demo device will appear in your device list once you're logged in.
+
+To regenerate or add demo data, run:
+```bash
+node scripts/add-demo-data.js
+```
+
+This script will:
+- Create a demo ELDES credential entry (username: `demo@eldes.demo`, password: `demo`)
+- Create a demo device with ID `999999999999999`
+- Generate 30 days of realistic temperature data (3 sensors, hourly readings)
+
 ## Setup
 
 ### 1. Install Dependencies
