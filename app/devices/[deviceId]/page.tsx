@@ -116,6 +116,14 @@ export default function DeviceDetailPage() {
         credentials: "include",
       });
       if (!response.ok) {
+        // If unauthorized, redirect to login with current path as redirect parameter
+        if (response.status === 401) {
+          const currentPath = window.location.pathname.replace("/eldes", "") || "/";
+          // Use __ instead of / to avoid URL encoding (matches middleware format)
+          const redirectPath = currentPath.replace(/\//g, "__").replace(/^__/, "");
+          window.location.href = `/eldes/login?redirect=${redirectPath}`;
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
@@ -149,9 +157,16 @@ export default function DeviceDetailPage() {
   const refreshAndFetchDeviceDetails = async (period?: string) => {
     try {
       // First, fetch fresh data from external API (same as refresh button)
-      await fetch(`/eldes/api/devices?refresh=true`, {
+      const refreshResponse = await fetch(`/eldes/api/devices?refresh=true`, {
         credentials: "include",
       });
+      // If unauthorized, redirect to login
+      if (!refreshResponse.ok && refreshResponse.status === 401) {
+        const currentPath = window.location.pathname.replace("/eldes", "") || "/";
+        const redirectPath = currentPath.replace(/\//g, "__").replace(/^__/, "");
+        window.location.href = `/eldes/login?redirect=${redirectPath}`;
+        return;
+      }
       // Then fetch device details from database
       await fetchDeviceDetails(period);
     } catch (error) {
