@@ -1,0 +1,65 @@
+{
+  "name": "eldes-monitor",
+  "version": "1.0.0",
+  "description": "A modern Next.js application for monitoring and controlling ELDES ESIM364 alarm systems via the ELDES Cloud API",
+  "license": "MIT",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humatic-ai/eldes-monitor.git"
+  },
+  "homepage": "https://github.com/humatic-ai/eldes-monitor#readme",
+  "bugs": {
+    "url": "https://github.com/humatic-ai/eldes-monitor/issues"
+  },
+  "keywords": [
+    "eldes",
+    "esim364",
+    "alarm",
+    "monitoring",
+    "nextjs",
+    "iot",
+    "security"
+  ],
+  "scripts": {
+    "dev": "PATH=\"/opt/bitnami/node/bin:$PATH\" next dev --turbopack -p 3600",
+    "build": "PATH=\"/opt/bitnami/node/bin:$PATH\" next build",
+    "start": "PATH=\"/opt/bitnami/node/bin:$PATH\" next start -p 3600",
+    "lint": "PATH=\"/opt/bitnami/node/bin:$PATH\" next lint",
+    "postinstall": "PATH=\"/opt/bitnami/node/bin:$PATH\" npm rebuild better-sqlite3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^24.5.2",
+    "autoprefixer": "^10.4.21",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.4.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.544.0",
+    "next": "^15.5.3",
+    "node-cron": "^3.0.3",
+    "postcss": "^8.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "recharts": "^2.15.0",
+    "sqlite3": "^5.1.7",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@types/sqlite3": "^3.1.11",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3"
+  }
+}

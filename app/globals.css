@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Color Palette - matching humaticai.com exactly */
+  --color-background: #111111;
+  --color-surface: #1a1a1a;
+  --color-border: #2c2c2c;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #a0a0a0;
+  --color-accent: #007aff;
+  --color-accent-rgb: 0, 122, 255;
+  --color-accent-hover: #0056b3;
+  --color-danger: #ff453a;
+  --color-success: #30d158;
+  --color-warning: #ff9f0a;
+
+  /* Typography - matching humaticai.com exactly */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing & Layout - matching humaticai.com exactly */
+  --spacing-unit: 8px;
+  --container-width: 1100px;
+  --border-radius: 12px;
+  --transition-speed: 0.3s;
+
+  /* Legacy aliases for backward compatibility */
+  --background: var(--color-background);
+  --surface: var(--color-surface);
+  --border: var(--color-border);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --accent: var(--color-accent);
+  --accent-hover: var(--color-accent-hover);
+  --danger: var(--color-danger);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  font-family: var(--font-family-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* Prevent background scroll when mobile nav is open */
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
+/* Hide desktop nav underline while mobile drawer is open */
+body.mobile-nav-open .nav-underline {
+  display: none;
+}
+
+/* Ensure backdrop blur works properly for fixed header */
+/* This ensures webkit support and proper application */
+header {
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Ensure header is above all content */
+}
+
+/* Ensure main content can scroll behind header */
+main {
+  position: relative;
+  z-index: 0; /* Lower than header */
+}
+
+/* Ensure body and html allow backdrop-filter to work */
+html {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Mobile navigation dropdown - fully opaque, isolated from parent styles */
+#mobileNav nav {
+  background-color: var(--color-surface);
+  opacity: 1;
+  isolation: isolate;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
