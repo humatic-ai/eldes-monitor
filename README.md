@@ -52,12 +52,12 @@ cd /home/bitnami/eldes
 npm run build
 ```
 
-#### Option B: Using the Start Script (Also Handles Build)
+#### Option B: Using the PM2 Manager Script
 
-The `start.sh` script automatically sets the correct PATH:
+The `pm2-manager.sh` script automatically sets the correct PATH and provides process management:
 
 ```bash
-chmod +x start.sh
+chmod +x pm2-manager.sh
 export PATH="/opt/bitnami/node/bin:$PATH"
 npm run build
 ```
@@ -118,13 +118,15 @@ pm2 startup
 pm2 save
 ```
 
-#### Option B: Using the Start Script
+#### Option B: Using the PM2 Manager Script (Recommended)
 
-The `start.sh` script automatically sets the correct PATH:
+The `pm2-manager.sh` script provides process management and automatically sets the correct PATH:
 
 ```bash
-chmod +x start.sh
-./start.sh
+chmod +x pm2-manager.sh
+./pm2-manager.sh start    # Start with PM2 (production)
+# Or for direct run without PM2:
+./pm2-manager.sh run      # Run directly (testing)
 ```
 
 #### Option C: Manual Start with PATH
@@ -201,8 +203,10 @@ npm run build
 # Start production server (port 3600)
 npm start
 
-# Or use the start script (handles PATH automatically)
-./start.sh
+# Or use the PM2 manager script (recommended for production)
+./pm2-manager.sh start    # Start with PM2
+# Or run directly without PM2 (for testing):
+./pm2-manager.sh run
 ```
 
 ### Production Management with PM2

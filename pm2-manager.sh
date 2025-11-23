@@ -185,6 +185,15 @@ show_logs() {
     pm2 logs "$APP_NAME"
 }
 
+# Run application directly (without PM2) - equivalent to start.sh
+run_direct() {
+    echo -e "${GREEN}Starting $APP_NAME directly (without PM2)...${NC}"
+    echo -e "${YELLOW}Note: For production, use 'start' command to run with PM2${NC}"
+    echo ""
+    cd "$SCRIPT_DIR"
+    exec npm start
+}
+
 # Main command handler
 case "${1:-}" in
     start)
@@ -207,6 +216,10 @@ case "${1:-}" in
     logs)
         show_logs
         ;;
+    run)
+        # Direct run without PM2 (replaces start.sh functionality)
+        run_direct
+        ;;
     test-warning)
         # Test mode: Force show warning (for testing)
         echo -e "${YELLOW}⚠️  WARNING: PM2 startup script is not configured!${NC}"
@@ -224,7 +237,8 @@ case "${1:-}" in
         echo "Usage: $0 [command]"
         echo ""
         echo "Commands:"
-        echo "  start    - Start the application"
+        echo "  start    - Start the application with PM2 (recommended for production)"
+        echo "  run      - Run the application directly without PM2 (for testing)"
         echo "  stop     - Stop the application"
         echo "  restart  - Restart the application"
         echo "  reload   - Reload the application (zero-downtime)"
@@ -232,7 +246,8 @@ case "${1:-}" in
         echo "  logs     - Show application logs"
         echo ""
         echo "Examples:"
-        echo "  $0 start      # Start the app"
+        echo "  $0 start      # Start with PM2 (production)"
+        echo "  $0 run        # Run directly without PM2 (testing)"
         echo "  $0 restart    # Restart the app"
         echo "  $0 reload     # Zero-downtime reload"
         echo "  $0 logs       # View logs"
