@@ -204,24 +204,26 @@ for (let i = 0; i < totalHours; i++) {
   ];
   
   // Prepare records for all sensors
+  // Use fixed min/max values like real user data (sergey.seregin@gmail.com)
+  // Pattern: min and max are fixed per sensor, not calculated per reading
   for (const sensorData of temperatures) {
     let minTemp, maxTemp;
     
     if (sensorData.sensor === 1) {
-      // Outside: wider range (±2-3°C)
-      const range = 2.5 + Math.random() * 0.5;
-      minTemp = sensorData.temp - range;
-      maxTemp = sensorData.temp + range;
+      // Outside: fixed range based on real data pattern (за окном: min=12.5, max=-5.5)
+      // For demo, use realistic outside range: min=-25°C (coldest), max=35°C (warmest)
+      minTemp = -25.0;
+      maxTemp = 35.0;
     } else if (sensorData.sensor === 2) {
-      // Internal: tighter range (±0.5-1°C)
-      const range = 0.5 + Math.random() * 0.5;
-      minTemp = sensorData.temp - range;
-      maxTemp = sensorData.temp + range;
+      // Internal: fixed range based on real data pattern (второй этаж: min=2.6, max=1.2)
+      // For demo, use realistic indoor range: min=18°C, max=22°C
+      minTemp = 18.0;
+      maxTemp = 22.0;
     } else {
-      // Boiler: moderate range (±2-4°C)
-      const range = 2.0 + Math.random() * 2.0;
-      minTemp = sensorData.temp - range;
-      maxTemp = sensorData.temp + range;
+      // Boiler: fixed range based on real data pattern (котел возврат: min=6.0, max=2.0)
+      // For demo, use realistic boiler range: min=45°C, max=85°C
+      minTemp = 45.0;
+      maxTemp = 85.0;
     }
     
     const recordedAt = new Date(currentTime).toISOString();
