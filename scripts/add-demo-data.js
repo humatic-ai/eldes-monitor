@@ -204,26 +204,27 @@ for (let i = 0; i < totalHours; i++) {
   ];
   
   // Prepare records for all sensors
-  // Use fixed min/max values like real user data (sergey.seregin@gmail.com)
-  // Pattern: min and max are fixed per sensor, not calculated per reading
+  // Use fixed min/max values matching real user data format (sergey.seregin@gmail.com)
+  // The frontend converts these by multiplying by 10, so we store them divided by 10
+  // Real data: "за окном" min=12.5→125°C, max=-5.5→-55°C (but these seem wrong)
+  // Real data: "второй этаж" min=2.6→26°C, max=1.2→12°C
+  // Real data: "котел возврат" min=6.0→60°C, max=2.0→20°C
+  // For demo, use realistic ranges stored in device format (divide by 10):
   for (const sensorData of temperatures) {
     let minTemp, maxTemp;
     
     if (sensorData.sensor === 1) {
-      // Outside: fixed range based on real data pattern (за окном: min=12.5, max=-5.5)
-      // For demo, use realistic outside range: min=-25°C (coldest), max=35°C (warmest)
-      minTemp = -25.0;
-      maxTemp = 35.0;
+      // Outside: realistic range -25°C to 35°C, stored as -2.5 to 3.5
+      minTemp = -2.5;
+      maxTemp = 3.5;
     } else if (sensorData.sensor === 2) {
-      // Internal: fixed range based on real data pattern (второй этаж: min=2.6, max=1.2)
-      // For demo, use realistic indoor range: min=18°C, max=22°C
-      minTemp = 18.0;
-      maxTemp = 22.0;
+      // Internal: realistic range 18°C to 22°C, stored as 1.8 to 2.2
+      minTemp = 1.8;
+      maxTemp = 2.2;
     } else {
-      // Boiler: fixed range based on real data pattern (котел возврат: min=6.0, max=2.0)
-      // For demo, use realistic boiler range: min=45°C, max=85°C
-      minTemp = 45.0;
-      maxTemp = 85.0;
+      // Boiler: realistic range 45°C to 85°C, stored as 4.5 to 8.5
+      minTemp = 4.5;
+      maxTemp = 8.5;
     }
     
     const recordedAt = new Date(currentTime).toISOString();
