@@ -163,7 +163,16 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    // Get all devices with latest status
+    // Get the credential_id for the current user
+    const credential = db
+      .prepare("SELECT id FROM eldes_credentials WHERE username = ? AND user_id = 1 LIMIT 1")
+      .get(credentials.username) as { id: number } | undefined;
+    
+    if (!credential) {
+      return NextResponse.json({ devices: [] });
+    }
+
+    // Get all devices with latest status - filtered by credential_id
     const devices = db
       .prepare(`
         SELECT 
@@ -195,9 +204,10 @@ export async function GET(request: NextRequest) {
             LIMIT 1
           ) as last_status_update
         FROM devices d
+        WHERE d.credential_id = ?
         ORDER BY d.last_seen DESC
       `)
-      .all();
+      .all(credential.id);
 
     return NextResponse.json({ devices });
   } catch (error) {
