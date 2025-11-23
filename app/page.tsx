@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Shield, Thermometer, Activity, Plus, RefreshCw, Lock, Unlock } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Device {
   id: number;
@@ -38,12 +39,32 @@ export default function Home() {
         credentials: "include",
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to fetch devices (${response.status})`;
+        
+        // Check if it's an ELDES API error
+        if (errorMessage.includes("ELDES") || errorMessage.includes("authentication") || errorMessage.includes("rate limit") || errorMessage.includes("attempts")) {
+          toast.error(errorMessage, {
+            duration: 6000,
+          });
+        } else {
+          toast.error(errorMessage);
+        }
+        throw new Error(errorMessage);
       }
       const data = await response.json();
       setDevices(data.devices || []);
+      if (refresh) {
+        toast.success("Devices refreshed successfully");
+      }
     } catch (error) {
       console.error("Error fetching devices:", error);
+      if (!(error instanceof Error && error.message.includes("Failed to fetch devices"))) {
+        // Only show toast if it's not already shown above
+        if (error instanceof Error) {
+          toast.error(error.message);
+        }
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

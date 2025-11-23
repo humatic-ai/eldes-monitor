@@ -170,6 +170,13 @@ export async function GET(request: NextRequest) {
           } // End of if (devices) block
         } catch (error) {
           console.error(`[Devices API] Error fetching devices:`, error);
+          // Return a proper error response with ELDES API error details
+          if (error instanceof Error) {
+            return NextResponse.json(
+              { error: error.message },
+              { status: 500 }
+            );
+          }
           throw error;
         }
       }

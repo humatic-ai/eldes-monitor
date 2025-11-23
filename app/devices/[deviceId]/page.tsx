@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import {
   ArrowLeft,
   Shield,
@@ -124,7 +125,10 @@ export default function DeviceDetailPage() {
           window.location.href = `/eldes/login?redirect=${redirectPath}`;
           return;
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to extract error message from response
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
       const data = await response.json();
       setDevice(data.device);
@@ -146,6 +150,17 @@ export default function DeviceDetailPage() {
       }
     } catch (error) {
       console.error("Error fetching device details:", error);
+      if (error instanceof Error) {
+        // Check if it's an ELDES API error
+        if (error.message.includes("ELDES") || error.message.includes("authentication") || error.message.includes("rate limit") || error.message.includes("attempts")) {
+          toast.error(error.message, {
+            duration: 6000,
+          });
+        } else if (!error.message.includes("401")) {
+          // Don't show toast for 401 (handled by redirect)
+          toast.error(error.message);
+        }
+      }
     } finally {
       if (!isPeriodChange) {
         setLoading(false);
@@ -171,6 +186,14 @@ export default function DeviceDetailPage() {
       await fetchDeviceDetails(period);
     } catch (error) {
       console.error("Error refreshing from external API:", error);
+      if (error instanceof Error) {
+        // Check if it's an ELDES API error
+        if (error.message.includes("ELDES") || error.message.includes("authentication") || error.message.includes("rate limit") || error.message.includes("attempts")) {
+          toast.error(error.message, {
+            duration: 6000,
+          });
+        }
+      }
       // If refresh fails, still try to fetch from database
       await fetchDeviceDetails(period);
     }
@@ -300,14 +323,21 @@ export default function DeviceDetailPage() {
           credentials: "include",
         });
         await fetchDeviceDetails();
+        toast.success(`Device ${action}ed successfully`);
         router.push("/");
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error || "Failed to control device"}`);
+        const errorMessage = error.error || "Failed to control device";
+        toast.error(errorMessage, {
+          duration: 6000,
+        });
       }
     } catch (error) {
       console.error("Error controlling device:", error);
-      alert("Failed to control device");
+      const errorMessage = error instanceof Error ? error.message : "Failed to control device";
+      toast.error(errorMessage, {
+        duration: 6000,
+      });
     } finally {
       setControlling(false);
     }
@@ -316,12 +346,25 @@ export default function DeviceDetailPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await fetch(`/eldes/api/devices?refresh=true`, {
+      const response = await fetch(`/eldes/api/devices?refresh=true`, {
         credentials: "include",
       });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to refresh devices (${response.status})`;
+        toast.error(errorMessage, {
+          duration: 6000,
+        });
+        return;
+      }
       await fetchDeviceDetails();
+      toast.success("Device data refreshed successfully");
     } catch (error) {
       console.error("Error refreshing:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to refresh devices";
+      toast.error(errorMessage, {
+        duration: 6000,
+      });
     } finally {
       setRefreshing(false);
     }
