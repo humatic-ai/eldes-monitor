@@ -61,15 +61,20 @@ export async function createSession(
   username: string,
   password: string
 ): Promise<string> {
-  // Validate credentials by attempting to authenticate
-  const api = new ELDESCloudAPI({ username, password });
-  try {
-    const authenticated = await api.authenticate();
-    if (!authenticated) {
-      throw new Error("Authentication failed");
+  // Allow demo credentials to bypass real API validation
+  const isDemoCredentials = username === "demo@eldes.demo" && password === "demo";
+  
+  if (!isDemoCredentials) {
+    // Validate credentials by attempting to authenticate
+    const api = new ELDESCloudAPI({ username, password });
+    try {
+      const authenticated = await api.authenticate();
+      if (!authenticated) {
+        throw new Error("Authentication failed");
+      }
+    } catch (error) {
+      throw new Error("Invalid credentials");
     }
-  } catch (error) {
-    throw new Error("Invalid credentials");
   }
 
   // Create session
