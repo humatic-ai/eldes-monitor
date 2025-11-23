@@ -2,6 +2,7 @@ import cron from "node-cron";
 import db from "./db";
 import { ELDESCloudAPI } from "./eldes-api";
 import { decrypt } from "./crypto";
+import { retryWithBackoff } from "./retry";
 
 /**
  * Fetch all devices for a credential set
@@ -31,8 +32,15 @@ async function fetchDevicesForCredential(credentialId: number) {
       password: password,
     });
 
-    // Get all devices
-    const devices = await api.getDevices();
+    // Get all devices with retry logic for transient network errors
+    const devices = await retryWithBackoff(
+      async () => await api.getDevices(),
+      {
+        maxRetries: 3,
+        initialDelay: 2000, // 2 seconds
+        maxDelay: 10000, // 10 seconds
+      }
+    );
 
     for (const device of devices) {
       // Use imei as deviceId (primary identifier)
@@ -71,10 +79,16 @@ async function fetchDevicesForCredential(credentialId: number) {
         deviceDbId = result.lastInsertRowid as number;
       }
 
-      // Fetch device status
-      
+      // Fetch device status with retry logic for transient network errors
       try {
-        const status = await api.getDeviceStatus(deviceId);
+        const status = await retryWithBackoff(
+          async () => await api.getDeviceStatus(deviceId),
+          {
+            maxRetries: 2, // Fewer retries for individual device status
+            initialDelay: 1000, // 1 second
+            maxDelay: 5000, // 5 seconds
+          }
+        );
 
         // Store device status with full raw data
         // Store the complete raw API responses for future use
