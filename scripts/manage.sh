@@ -232,7 +232,7 @@ case "${1:-}" in
         echo "  pm2 save"
         ;;
     *)
-        echo "PM2 Management Script for ELDES Monitor"
+        echo "Application Management Script for ELDES Monitor"
         echo ""
         echo "Usage: $0 [command]"
         echo ""
