@@ -30,7 +30,22 @@ export async function GET(request: NextRequest) {
           password: credentials.password,
         });
 
-          const devices = await api.getDevices();
+          let devices;
+          try {
+            devices = await api.getDevices();
+          } catch (apiError) {
+            // Handle rate limiting gracefully
+            if (apiError instanceof Error && apiError.message.includes("attempts.limit")) {
+              console.warn(`[Devices API] Rate limit hit for ${credentials.username}, using cached data`);
+              // Continue with cached data from database instead of failing
+              // Fall through to return cached devices
+            } else {
+              throw apiError; // Re-throw other errors
+            }
+          }
+          
+          // Only process devices if we successfully fetched them
+          if (devices) {
 
           for (const device of devices) {
             // Use imei as device_id (primary identifier)
@@ -158,8 +173,15 @@ export async function GET(request: NextRequest) {
               );
             }
           }
+          } // End of if (devices) block
         } catch (error) {
-          console.error(`Error fetching devices:`, error);
+          // Log error but continue to return cached data
+          if (error instanceof Error && error.message.includes("attempts.limit")) {
+            console.warn(`[Devices API] Rate limit error for ${credentials.username}, returning cached data`);
+          } else {
+            console.error(`[Devices API] Error fetching devices:`, error);
+          }
+          // Continue to return cached devices from database
         }
     }
 
