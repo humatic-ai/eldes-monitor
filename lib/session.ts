@@ -65,15 +65,34 @@ export async function createSession(
   const isDemoCredentials = username === "demo@eldes.demo" && password === "demo";
   
   if (!isDemoCredentials) {
-    // Validate credentials by attempting to authenticate
-    const api = new ELDESCloudAPI({ username, password });
-    try {
-      const authenticated = await api.authenticate();
-      if (!authenticated) {
-        throw new Error("Authentication failed");
+    // Check if credentials are already stored in the database
+    const storedCredential = db
+      .prepare("SELECT password_encrypted FROM eldes_credentials WHERE username = ? AND user_id = 1 LIMIT 1")
+      .get(username) as { password_encrypted: string } | undefined;
+    
+    if (storedCredential) {
+      // Credentials exist in database - verify password matches
+      const storedPassword = decrypt(storedCredential.password_encrypted);
+      if (storedPassword !== password) {
+        throw new Error("Invalid credentials");
       }
-    } catch (error) {
-      throw new Error("Invalid credentials");
+      // Password matches stored credentials - allow login without API validation
+      console.log("[Session] Using stored credentials for:", username);
+    } else {
+      // Credentials not in database - validate with API
+      const api = new ELDESCloudAPI({ username, password });
+      try {
+        const authenticated = await api.authenticate();
+        if (!authenticated) {
+          throw new Error("Authentication failed");
+        }
+      } catch (error) {
+        // Check if it's a rate limit error
+        if (error instanceof Error && error.message.includes("attempts.limit")) {
+          throw new Error("Too many authentication attempts. Please wait a few minutes and try again, or add your credentials through the Credentials page first.");
+        }
+        throw new Error("Invalid credentials");
+      }
     }
   }
 
