@@ -1,6 +1,6 @@
 #!/bin/bash
-# Application Management Script for ELDES Monitor
-# Usage: ./scripts/manage.sh [start|stop|restart|reload|status|logs|run]
+# ELDES Monitor Application Management Script
+# Usage: ./eldes-monitor.sh [start|stop|restart|reload|status|logs|run]
 
 set -e
 
@@ -232,7 +232,7 @@ case "${1:-}" in
         echo "  pm2 save"
         ;;
     *)
-        echo "Application Management Script for ELDES Monitor"
+        echo "ELDES Monitor Application Management Script"
         echo ""
         echo "Usage: $0 [command]"
         echo ""

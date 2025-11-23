@@ -54,10 +54,10 @@ npm run build
 
 #### Option B: Using the Management Script
 
-The `scripts/manage.sh` script automatically sets the correct PATH and provides process management:
+The `eldes-monitor.sh` script automatically sets the correct PATH and provides process management:
 
 ```bash
-chmod +x scripts/manage.sh
+chmod +x eldes-monitor.sh
 export PATH="/opt/bitnami/node/bin:$PATH"
 npm run build
 ```
@@ -121,13 +121,13 @@ pm2 save
 
 #### Option B: Using the Management Script (Recommended)
 
-The `scripts/manage.sh` script provides process management and automatically sets the correct PATH:
+The `eldes-monitor.sh` script provides process management and automatically sets the correct PATH:
 
 ```bash
-chmod +x scripts/manage.sh
-./scripts/manage.sh start    # Start with PM2 (production)
+chmod +x eldes-monitor.sh
+./eldes-monitor.sh start    # Start with PM2 (production)
 # Or for direct run without PM2:
-./scripts/manage.sh run      # Run directly (testing)
+./eldes-monitor.sh run      # Run directly (testing)
 ```
 
 #### Option C: Manual Start with PATH
@@ -205,9 +205,9 @@ npm run build
 npm start
 
 # Or use the management script (recommended for production)
-./scripts/manage.sh start    # Start with PM2
+./eldes-monitor.sh start    # Start with PM2
 # Or run directly without PM2 (for testing):
-./scripts/manage.sh run
+./eldes-monitor.sh run
 ```
 
 ### Production Management with PM2
@@ -216,25 +216,25 @@ For production deployments, use PM2 for process management:
 
 ```bash
 # Start application
-./scripts/manage.sh start
+./eldes-monitor.sh start
 
 # Stop application
-./scripts/manage.sh stop
+./eldes-monitor.sh stop
 
 # Restart application
-./scripts/manage.sh restart
+./eldes-monitor.sh restart
 
 # Zero-downtime reload (graceful restart)
-./scripts/manage.sh reload
+./eldes-monitor.sh reload
 
 # View status
-./scripts/manage.sh status
+./eldes-monitor.sh status
 
 # View logs
-./scripts/manage.sh logs
+./eldes-monitor.sh logs
 
 # Run directly without PM2 (for testing)
-./scripts/manage.sh run
+./eldes-monitor.sh run
 
 # Configure auto-start on system reboot
 pm2 startup

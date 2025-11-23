@@ -35,8 +35,8 @@
    ```bash
    npm start
    # Or use the management script:
-   ./scripts/manage.sh start    # Start with PM2 (production)
-   ./scripts/manage.sh run      # Run directly without PM2 (testing)
+   ./eldes-monitor.sh start    # Start with PM2 (production)
+   ./eldes-monitor.sh run      # Run directly without PM2 (testing)
    ```
 
 7. **Access the Application**
