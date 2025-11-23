@@ -133,16 +133,16 @@ PM2 provides process management, auto-restart, and log management:
 npm install -g pm2
 
 # Use the management script
-chmod +x scripts/manage.sh
-./scripts/manage.sh start
+chmod +x eldes-monitor.sh
+./eldes-monitor.sh start
 
 # Other management commands:
-./scripts/manage.sh stop      # Stop the application
-./scripts/manage.sh restart   # Restart the application
-./scripts/manage.sh reload    # Zero-downtime reload
-./scripts/manage.sh status    # Show application status
-./scripts/manage.sh logs       # View application logs
-./scripts/manage.sh run        # Run directly without PM2 (for testing)
+./eldes-monitor.sh stop      # Stop the application
+./eldes-monitor.sh restart   # Restart the application
+./eldes-monitor.sh reload    # Zero-downtime reload
+./eldes-monitor.sh status    # Show application status
+./eldes-monitor.sh logs      # View application logs
+./eldes-monitor.sh run       # Run directly without PM2 (for testing)
 ```
 
 **⚠️ Important**: The script will warn you if PM2 startup is not configured. To enable auto-start on system reboot:
