@@ -23,12 +23,18 @@ export async function GET(request: NextRequest) {
     const refresh = searchParams.get("refresh") === "true";
 
     if (refresh) {
-      // Fetch fresh data from API using session credentials
-      try {
-        const api = new ELDESCloudAPI({
-          username: credentials.username,
-          password: credentials.password,
-        });
+      // Skip API call for demo credentials
+      const isDemoCredentials = credentials.username === "demo@eldes.demo" && credentials.password === "demo";
+      if (isDemoCredentials) {
+        console.log("[Devices API] Skipping API refresh for demo credentials, using cached data");
+        // Fall through to return cached devices from database
+      } else {
+        // Fetch fresh data from API using session credentials
+        try {
+          const api = new ELDESCloudAPI({
+            username: credentials.username,
+            password: credentials.password,
+          });
 
           let devices;
           try {
@@ -183,6 +189,7 @@ export async function GET(request: NextRequest) {
           }
           // Continue to return cached devices from database
         }
+      }
     }
 
     // Get the credential_id for the current user

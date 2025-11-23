@@ -18,6 +18,14 @@ async function fetchDevicesForCredential(credentialId: number) {
     }
 
     const password = decrypt(credential.password_encrypted);
+    
+    // Skip API call for demo credentials
+    const isDemoCredentials = credential.username === "demo@eldes.demo" && password === "demo";
+    if (isDemoCredentials) {
+      console.log(`[Cron] Skipping API call for demo credentials (credential ${credentialId})`);
+      return;
+    }
+    
     const api = new ELDESCloudAPI({
       username: credential.username,
       password: password,

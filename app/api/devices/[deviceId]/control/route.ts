@@ -42,6 +42,15 @@ export async function POST(
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
+    // Skip API call for demo credentials
+    const isDemoCredentials = credentials.username === "demo@eldes.demo" && credentials.password === "demo";
+    if (isDemoCredentials) {
+      return NextResponse.json(
+        { error: "Device control is not available for demo credentials" },
+        { status: 403 }
+      );
+    }
+
     // Create API client with session credentials
     const api = new ELDESCloudAPI({
       username: credentials.username,
