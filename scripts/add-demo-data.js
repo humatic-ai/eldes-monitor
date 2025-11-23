@@ -75,19 +75,60 @@ db.prepare("DELETE FROM temperature_history WHERE device_id = ?").run(deviceDbId
 console.log('Cleared existing temperature data for demo device');
 
 // Generate realistic temperature data with variation
-let baseTemp = 20.0;
 let currentTime = thirtyDaysAgo;
 
 // Generate 3 sensors worth of data
+// Sensor 1: Outside temperature (5-25°C, varies with time of day)
+// Sensor 2: Internal temperature (18-22°C, relatively stable)
+// Sensor 3: Boiler temperature (50-80°C, heating system)
+
 for (let sensor = 1; sensor <= 3; sensor++) {
-  const sensorName = `Sensor ${sensor}`;
-  baseTemp = 18 + sensor * 2;
+  let sensorName, baseTemp, tempRange, variation;
+  
+  if (sensor === 1) {
+    // Outside temperature: varies significantly with time of day
+    sensorName = 'Outside';
+    baseTemp = 15.0; // Average outside temp
+    tempRange = 10.0; // ±10°C variation
+    variation = 2.0; // Random variation
+  } else if (sensor === 2) {
+    // Internal temperature: stable indoor temp
+    sensorName = 'Internal';
+    baseTemp = 20.0; // Comfortable indoor temp
+    tempRange = 2.0; // ±2°C variation
+    variation = 0.5; // Small random variation
+  } else {
+    // Boiler temperature: heating system temp
+    sensorName = 'Boiler';
+    baseTemp = 65.0; // Typical boiler temp
+    tempRange = 15.0; // ±15°C variation (50-80°C range)
+    variation = 3.0; // Some variation
+  }
   
   for (let i = 0; i < 30 * 24; i++) {
-    const dayOfCycle = (i % 24);
-    const dayTemp = Math.sin((dayOfCycle - 6) * Math.PI / 12) * 5;
-    const randomVariation = (Math.random() - 0.5) * 2;
-    const temperature = baseTemp + dayTemp + randomVariation;
+    const hourOfDay = (i % 24);
+    let temperature;
+    
+    if (sensor === 1) {
+      // Outside: lower at night (2-6 AM), peaks in afternoon (2-4 PM)
+      // Simulate daily cycle: coldest around 4 AM, warmest around 2 PM
+      const dayCycle = Math.sin((hourOfDay - 4) * Math.PI / 12) * tempRange;
+      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
+      // Clamp to realistic outside range (5-25°C)
+      temperature = Math.max(5, Math.min(25, temperature));
+    } else if (sensor === 2) {
+      // Internal: slight variation throughout day, more stable
+      const dayCycle = Math.sin((hourOfDay - 6) * Math.PI / 12) * tempRange;
+      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
+      // Clamp to comfortable indoor range (18-22°C)
+      temperature = Math.max(18, Math.min(22, temperature));
+    } else {
+      // Boiler: varies with heating demand (lower at night, higher during day)
+      const dayCycle = Math.sin((hourOfDay - 6) * Math.PI / 12) * tempRange;
+      temperature = baseTemp + dayCycle + (Math.random() - 0.5) * variation;
+      // Clamp to typical boiler range (50-80°C)
+      temperature = Math.max(50, Math.min(80, temperature));
+    }
     
     const minTemp = temperature - 0.5;
     const maxTemp = temperature + 0.5;
