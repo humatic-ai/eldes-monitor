@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./header";
 import Footer from "./footer";
 import { Toaster } from "react-hot-toast";
+import { ConfirmDialogProvider } from "./components/ConfirmDialogProvider";
 
 // Force dynamic rendering to ensure middleware runs
 export const dynamic = 'force-dynamic';
@@ -21,12 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="min-h-screen">
       <body className="antialiased bg-background text-text-primary flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <Toaster
+        <ConfirmDialogProvider>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <Toaster
           position="bottom-right"
           toastOptions={{
             duration: 5000,
@@ -51,6 +53,7 @@ export default function RootLayout({
             },
           }}
         />
+        </ConfirmDialogProvider>
       </body>
     </html>
   );

@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Shield } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { useConfirm } from "../components/ConfirmDialogProvider";
 
 interface Credential {
   id: number;
@@ -15,6 +17,7 @@ interface Credential {
 }
 
 export default function CredentialsPage() {
+  const confirm = useConfirm();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -84,24 +87,34 @@ export default function CredentialsPage() {
         setFormData({ username: "", password: "", deviceName: "" });
         setShowForm(false);
         fetchCredentials();
+        toast.success("Credentials added successfully");
         // Trigger device fetch
         fetch("/eldes/api/devices?refresh=true", {
           credentials: "include",
         }).catch(console.error);
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error || "Failed to add credentials"}`);
+        const errorMessage = error.error || "Failed to add credentials";
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error adding credentials:", error);
-      alert("Failed to add credentials");
+      toast.error("Failed to add credentials");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete these credentials?")) {
+    const confirmed = await confirm({
+      title: "Delete Credentials",
+      message: "Are you sure you want to delete these credentials?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      confirmVariant: "danger",
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -113,12 +126,13 @@ export default function CredentialsPage() {
 
       if (response.ok) {
         fetchCredentials();
+        toast.success("Credentials deleted successfully");
       } else {
-        alert("Failed to delete credentials");
+        toast.error("Failed to delete credentials");
       }
     } catch (error) {
       console.error("Error deleting credentials:", error);
-      alert("Failed to delete credentials");
+      toast.error("Failed to delete credentials");
     }
   };
 

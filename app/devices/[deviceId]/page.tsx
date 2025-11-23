@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useConfirm } from "../../components/ConfirmDialogProvider";
 import {
   ArrowLeft,
   Shield,
@@ -78,6 +79,7 @@ interface TemperatureData {
 export default function DeviceDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const confirm = useConfirm();
   const deviceId = params.deviceId as string;
 
   const [device, setDevice] = useState<any>(null);
@@ -302,7 +304,15 @@ export default function DeviceDetailPage() {
   };
 
   const handleControl = async (action: "arm" | "disarm", partitionId = 1) => {
-    if (!confirm(`Are you sure you want to ${action} this device?`)) {
+    const confirmed = await confirm({
+      title: `${action === "arm" ? "Arm" : "Disarm"} Device`,
+      message: `Are you sure you want to ${action} this device?`,
+      confirmText: action === "arm" ? "Arm" : "Disarm",
+      cancelText: "Cancel",
+      confirmVariant: "default",
+    });
+
+    if (!confirmed) {
       return;
     }
 
